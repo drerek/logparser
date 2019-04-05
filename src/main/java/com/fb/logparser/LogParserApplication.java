@@ -29,37 +29,46 @@ public class LogParserApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(LogParserApplication.class, args);
-
-
     }
 
     @Override
     public void run(String... args) {
-        Map<Integer, Integer> elapsedTime = new TreeMap<>();
-        Map<Integer, Integer> bytes = new TreeMap<>();
-        for (int i = 64396; i < 1707914; i++) {
-            int ids = i - 64396;
-            if (ids % 100000 == 0) {
-                log.info(ids);
-            }
-            LogUnit logUnit = repository.findById(i);
-//            log.info(logUnit);
-//            String time = logUnit.getTime();
-//            int index = time.indexOf('.');
-//            if (index== -1 ){
-//                index = time.length()-1;
-//            }
-//            time = time.substring(0, );
-//            Date date = Date.from(Instant.ofEpochSecond(Long.valueOf(time)));
-//            log.info(date);
-            Integer elapsed = Integer.valueOf(logUnit.getElapsed());
 
-            if (elapsedTime.containsKey(elapsed)) {
-                int count = elapsedTime.get(elapsed) + 1;
-                elapsedTime.put(elapsed, count);
-            } else {
-                elapsedTime.put(elapsed, 1);
+    }
+
+    //Save logUnit object to DB
+    public void saveToDatabase(String filePath, LogRepository repository) {
+        Scanner sc = null;
+        try {
+            //Scanner for reading file
+            sc = new Scanner(new File(filePath));
+            while (sc.hasNextLine()) {
+                //Scanner for reading line
+                Scanner lineScanner = new Scanner(sc.nextLine());
+                String line = lineScanner.toString();
+                try {
+                    log.debug("Trying to mapped line to object");
+                    LogUnit logUnit = new LogUnit(lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next());
+                    try {
+                        log.debug("Trying to save logUnit to database");
+                        repository.save(logUnit);
+                    } catch (Exception e) {
+                        log.error("Exception while saving" + logUnit.toString() + e.getMessage());
+                    }
+                } catch (NoSuchElementException e) {
+                    log.error("Line cant mapped to object" + line);
+                }
             }
+        } catch (FileNotFoundException e) {
+            log.error("File not found" + e.getMessage());
+        }
+    }
+
+    public BigInteger getAvgByteValue() {
+        // Map of value:numbersOfInputs
+        Map<Integer, Integer> bytes = new TreeMap<>();
+
+        for (LogUnit logUnit : repository.findAll()) {
             Integer byteNumber = Integer.valueOf(logUnit.getBytes());
             if (bytes.containsKey(byteNumber)) {
                 int count = bytes.get(byteNumber);
@@ -68,51 +77,33 @@ public class LogParserApplication implements CommandLineRunner {
                 bytes.put(byteNumber, 1);
             }
         }
-        BigInteger sumElapsed = BigInteger.valueOf(0);
-        BigInteger count = BigInteger.valueOf(0);
-        for (Map.Entry<Integer, Integer> entry : elapsedTime.entrySet()) {
-            sumElapsed = sumElapsed.add(BigInteger.valueOf(entry.getKey()).multiply(BigInteger.valueOf(entry.getValue())));
-            count = count.add(BigInteger.ONE);
-        }
-        BigInteger sumBytes = BigInteger.valueOf(0);
-        count = BigInteger.valueOf(0);
-        for (Map.Entry<Integer, Integer> entry : bytes.entrySet()) {
-            sumBytes = sumBytes.add(BigInteger.valueOf(entry.getKey()).multiply(BigInteger.valueOf(entry.getValue())));
-            count = count.add(BigInteger.ONE);
-        }
-
-
-        log.info(sumElapsed.divide(count));
-        log.info(sumBytes.divide(count));
-}
-
-    public void saveToDatabase(String filePath, LogRepository repository) {
-        Scanner sc = null;
-        filePath = "C:\\Users\\Tempuser\\IdeaProjects\\logparser\\src\\main\\resources\\access.log";
-        try {
-            sc = new Scanner(new File(filePath));
-            while (sc.hasNextLine()) {
-
-                Scanner lineScanner = new Scanner(sc.nextLine());
-                String line = lineScanner.toString();
-
-                try {
-                    LogUnit logUnit = new LogUnit(lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next(), lineScanner.next());
-
-                    try {
-                        repository.save(logUnit);
-                    } catch (Exception e) {
-                        log.error("Exception while saving" + logUnit.toString() + e.getMessage());
-                    }
-                    //log.info(logUnit.toString());
-                } catch (NoSuchElementException e) {
-                    log.error(line);
-                }
-
-            }
-        } catch (FileNotFoundException e) {
-            log.error("File not found" + e.getMessage());
-        }
+        return getAvgValue(bytes);
     }
 
+    public BigInteger getAvgElapsedValue() {
+        // Map of value:numbersOfInputs
+        Map<Integer, Integer> elapsedTime = new TreeMap<>();
+
+        for (LogUnit logUnit : repository.findAll()) {
+            Integer elapsed = Integer.valueOf(logUnit.getElapsed());
+            if (elapsedTime.containsKey(elapsed)) {
+                int count = elapsedTime.get(elapsed) + 1;
+                elapsedTime.put(elapsed, count);
+            } else {
+                elapsedTime.put(elapsed, 1);
+            }
+        }
+        return getAvgValue(elapsedTime);
+    }
+
+    // Get avg value from map [value:counts]
+    public BigInteger getAvgValue(Map<Integer, Integer> inputData) {
+        BigInteger sum = BigInteger.valueOf(0);
+        BigInteger count = BigInteger.valueOf(0);
+        for (Map.Entry<Integer, Integer> entry : inputData.entrySet()) {
+            sum = sum.add(BigInteger.valueOf(entry.getKey()).multiply(BigInteger.valueOf(entry.getValue())));
+            count = count.add(BigInteger.ONE);
+        }
+        return sum.divide(count);
+    }
 }
