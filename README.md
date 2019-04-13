@@ -14,3 +14,11 @@ so the highest value for 22:00-22:59 **122255** entries.
     * proxy.mel.connect.com.au with **3160** entries
     * proxy1.syd.connect.com.au with **30459** entries
     * proxy2.syd.connect.com.au with **37906** entries
+* The most popular types of content:
+    * application/rdf+xml with **375806** entries
+    * application/xml with **319605** entries
+    * text/html with **382218** entries
+    * text/plain with **232589** entries
+* The most intresting types of content:
+    * text/devil with **2** entries
+    

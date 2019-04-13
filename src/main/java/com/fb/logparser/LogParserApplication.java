@@ -31,7 +31,7 @@ public class LogParserApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
+        //enter functions that you interested
     }
 
     //Save logUnit object to DB
@@ -176,4 +176,20 @@ public class LogParserApplication implements CommandLineRunner {
         }
         return peerHostActivity;
     }
+
+    //Return map for [type:entries]
+    public Map getActivityByType() {
+        Map<String, Integer> typeActivity = new TreeMap<>();
+        for (LogUnit logUnit : repository.findAll()) {
+            String type = logUnit.getType();
+            if (typeActivity.containsKey(type)) {
+                int count = typeActivity.get(type);
+                typeActivity.put(type, count + 1);
+            } else {
+                typeActivity.put(type, 1);
+            }
+        }
+        return typeActivity;
+    }
 }
+
