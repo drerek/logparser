@@ -33,7 +33,7 @@ public class LogUnit {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    int id;
+    long id;
     String time;
     String elapsed;
     String remotehost;

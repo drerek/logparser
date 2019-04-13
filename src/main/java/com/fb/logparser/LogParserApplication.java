@@ -11,10 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.time.Instant;
+import java.util.*;
 
 @SpringBootApplication
 public class LogParserApplication implements CommandLineRunner {
@@ -105,5 +103,26 @@ public class LogParserApplication implements CommandLineRunner {
             count = count.add(BigInteger.ONE);
         }
         return sum.divide(count);
+    }
+
+    //Return map for [hour:entries]
+    public Map getActivityByHours() {
+        Map<Integer, Integer> activity = new TreeMap<>();
+        for (LogUnit logUnit : repository.findAll()) {
+            String time = logUnit.getTime();
+            if (time.indexOf('.') != -1) {
+                time = time.substring(0, time.indexOf('.'));
+
+            }
+            Date date = Date.from(Instant.ofEpochSecond(Long.valueOf(time)));
+            int hour = date.getHours();
+            if (activity.containsKey(hour)) {
+                int count = activity.get(hour);
+                activity.put(hour, count + 1);
+            } else {
+                activity.put(hour, 1);
+            }
+        }
+        return activity;
     }
 }
