@@ -125,4 +125,24 @@ public class LogParserApplication implements CommandLineRunner {
         }
         return activity;
     }
+
+    //Return map for [remoteHost:entries]
+    public Map getActivityByRemoteHost() {
+        Map<String, Integer> remoteHostActivity = new TreeMap<>();
+        for (LogUnit logUnit : repository.findAll()) {
+            String remotehost = logUnit.getRemotehost();
+
+            if (remoteHostActivity.containsKey(remotehost)) {
+                int count = remoteHostActivity.get(remotehost);
+                remoteHostActivity.put(remotehost, count + 1);
+            } else {
+                remoteHostActivity.put(remotehost, 1);
+            }
+        }
+        return remoteHostActivity;
+    }
+
+
+
+
 }
