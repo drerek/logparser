@@ -157,5 +157,23 @@ public class LogParserApplication implements CommandLineRunner {
         return userNameActivity;
     }
 
-
+    //Return map for [peerHost:entries]
+    public Map getActivityByPeerHost() {
+        Map<String, Integer> peerHostActivity = new TreeMap<>();
+        for (LogUnit logUnit : repository.findAll()) {
+            String peerhost = logUnit.getPeerstatus_peerhost();
+            if (!peerhost.contains("/")) {
+                continue;
+            } else {
+                peerhost = peerhost.substring(peerhost.indexOf("/") + 1);
+            }
+            if (peerHostActivity.containsKey(peerhost)) {
+                int count = peerHostActivity.get(peerhost);
+                peerHostActivity.put(peerhost, count + 1);
+            } else {
+                peerHostActivity.put(peerhost, 1);
+            }
+        }
+        return peerHostActivity;
+    }
 }
