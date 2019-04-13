@@ -7,3 +7,4 @@ Finded artifacts:
 so the highest value for 22:00-22:59 **122255** entries.
 * The most active IP adress in 10.105.\*.\* is 10.105.23.212 with **7224** entries
 in 210.8.79.* is 210.8.79.210 with **5178** entries
+* The most active user **sbello** with **7052** entries
